@@ -1,38 +1,30 @@
 <script>
+  import { todos, selectedTodoId, selectedTodo } from "./stores.js";
+
   let nextTodoText = "";
-  let selectedTodo = null;
-  let todos = JSON.parse(localStorage.getItem("todos")) || [];
-  let selectedTodoId = JSON.parse(localStorage.getItem("selectedTodoId")) || -1;
-
-  $: localStorage.setItem("todos", JSON.stringify(todos));
-
-  $: {
-    selectedTodo = todos.find(x => x.id === selectedTodoId);
-    localStorage.setItem("selectedTodoId", JSON.stringify(selectedTodoId));
-  }
 
   function addTodo() {
-    todos = [
+    $todos = [
       {
         id: Date.now(),
         text: nextTodoText,
         done: false
       },
-      ...todos
+      ...$todos
     ];
     nextTodoText = "";
   }
 
   function deleteTodo(todo) {
-    todos = todos.filter(x => x.id !== todo.id);
+    $todos = $todos.filter(x => x.id !== todo.id);
   }
 
   function selectTodo(todo) {
-    selectedTodoId = todo.id;
+    $selectedTodoId = todo.id;
   }
 
   function completeTodo(todo) {
-    todos.find(x => x.id === todo.id).done = true;
+    $todos.find(x => x.id === todo.id).done = true;
   }
 </script>
 
@@ -72,9 +64,9 @@
     <form on:submit|preventDefault={addTodo} autocomplete="off">
       <input class="nextTodo" type="text" bind:value={nextTodoText} />
     </form>
-    {#each todos as todo (todo.id)}
+    {#each $todos as todo (todo.id)}
       <div
-        class:selected={selectedTodoId === todo.id}
+        class:selected={$selectedTodoId === todo.id}
         on:click={() => selectTodo(todo)}>
         <input type="checkbox" bind:checked={todo.done} />
         <span class="button" on:click={() => deleteTodo(todo)}>❌</span>
@@ -84,8 +76,8 @@
     {/each}
   </div>
   <div class="column">
-    {#if selectedTodo && selectedTodo.imgSrc}
-      <img src={selectedTodo.imgSrc} alt={selectedTodo.text + ' - image'} />
+    {#if $selectedTodo && $selectedTodo.imgSrc}
+      <img src={$selectedTodo.imgSrc} alt={$selectedTodo.text + ' - image'} />
     {/if}
   </div>
 </main>
